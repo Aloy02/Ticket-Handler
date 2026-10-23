@@ -1,3 +1,3 @@
 docker run -p 5000:5000 \
-  -e  \
+  --env-file .env \
   ticket-handler

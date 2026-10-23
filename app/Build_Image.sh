@@ -1,1 +1,1 @@
-docker build -t ticket-handler .
+docker buildx build --provenance=false --platform linux/amd64 -t ticket-handler .

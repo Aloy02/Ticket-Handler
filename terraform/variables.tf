@@ -27,3 +27,6 @@ variable "DB_USERNAME" {
 variable "DB_PASSWORD" {
   type = string
 }
+variable "CLUSTER" {
+  type = string
+}

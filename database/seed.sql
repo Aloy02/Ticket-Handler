@@ -1,15 +1,28 @@
-DROP DATABASE IF EXISTS tickets;
-CREATE DATABASE tickets;
-\c tickets;
+
+\c ticketdb
+
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS tickets CASCADE;
 
 CREATE TABLE categories (
-    id INT PRIMARY KEY,
-    cat_name VARCHAR(100)
+    category_id INT GENERATED ALWAYS AS IDENTITY,
+    category_name VARCHAR(100),
+    PRIMARY KEY (category_id)
 );
 
-INSERT INTO categories (id, cat_name) VALUES (1, 'Bug');
-INSERT INTO categories (id, cat_name) VALUES (2, 'Feature');
-INSERT INTO categories (id, cat_name) VALUES (3, 'Task');
-INSERT INTO categories (id, cat_name) VALUES (4, 'Improvement');
-INSERT INTO categories (id, cat_name) VALUES (5, 'Documentation');
-INSERT INTO categories (id, cat_name) VALUES (6, 'Support');
+INSERT INTO categories (category_name) VALUES ('Bug');
+INSERT INTO categories (category_name) VALUES ('Feature');
+INSERT INTO categories (category_name) VALUES ('Task');
+INSERT INTO categories (category_name) VALUES ('Improvement');
+INSERT INTO categories (category_name) VALUES ('Documentation');
+INSERT INTO categories (category_name) VALUES ('Support');
+
+CREATE TABLE tickets (
+    ticket_id INT GENERATED ALWAYS AS IDENTITY,
+    category_id INT NOT NULL,
+    ticket_text TEXT NOT NULL,
+    responsible_person TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (ticket_id),
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);

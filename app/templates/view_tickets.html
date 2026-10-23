@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket List & Details</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f4f4f9;
+      min-height: 100vh;
+      margin: 0;
+      padding: 30px 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .header h2 {
+      margin: 0;
+      color: #333;
+      font-size: 24px;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      padding: 10px 18px;
+      background-color: #0066cc;
+      color: #ffffff;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #0052a3;
+    }
+
+    /* Filter / Controls Section */
+    .controls-card {
+      background: #ffffff;
+      padding: 16px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 0;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      color: #444;
+    }
+
+    .form-group input[type="text"],
+    .form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+    }
+
+    /* Ticket Grid / Cards */
+    .ticket-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ticket-card {
+      background: #ffffff;
+      padding: 20px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border-left: 4px solid #0066cc;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .ticket-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .ticket-id {
+      font-weight: 700;
+      color: #0066cc;
+      font-size: 15px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Category Badges */
+    .badge-bug { background-color: #ffebe9; color: #cf222e; }
+    .badge-feature { background-color: #dafbe1; color: #1a7f37; }
+    .badge-task { background-color: #ddf4ff; color: #0969da; }
+    .badge-default { background-color: #f1f3f5; color: #495057; }
+
+    .ticket-body {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #333;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+    }
+
+    .ticket-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid #f0f0f0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .ticket-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .responsible-person {
+      color: #444;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Page Header -->
+    <div class="header">
+      <h2>Support Tickets</h2>
+      <a href="/create-ticket" class="btn-primary">+ Create Ticket</a>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="controls-card">
+      <div class="form-group">
+        <label for="search">Search Tickets</label>
+        <input type="text" id="search" placeholder="Filter by text or assigned email...">
+      </div>
+      <div class="form-group" style="max-width: 220px;">
+        <label for="category">Category</label>
+        <select id="category">
+          <option value="all">All Categories</option>
+          {% for subject in subjects %}
+            <option value="{{ subject | lower }}">{{ subject }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Tickets Container -->
+    <div class="ticket-list" id="ticketList">
+
+      {% if tickets %}
+        {% for ticket in tickets %}
+        <div class="ticket-card" data-category="{% if ticket.category_id == 1 %}bug{% elif ticket.category_id == 2 %}feature{% elif ticket.category_id == 3 %}task{% else %}other{% endif %}">
+          <div class="ticket-header">
+            <span class="ticket-id">#{{ ticket.ticket_id }}</span>
+            <span class="badge 
+              {% if ticket.category_id == 1 %}badge-bug
+              {% elif ticket.category_id == 2 %}badge-feature
+              {% elif ticket.category_id == 3 %}badge-task
+              {% else %}badge-default{% endif %}">
+              
+              {% if ticket.category_id == 1 %}Bug
+              {% elif ticket.category_id == 2 %}Feature
+              {% elif ticket.category_id == 3 %}Task
+              {% else %}Category #{{ ticket.category_id }}{% endif %}
+            </span>
+          </div>
+
+          <div class="ticket-body">
+            {{ ticket.ticket_text }}
+          </div>
+
+          <div class="ticket-footer">
+            <div class="ticket-meta-item">
+              <strong>Assigned to:</strong>
+              <span class="responsible-person">{{ ticket.responsible_person }}</span>
+            </div>
+            <div class="ticket-meta-item">
+              <strong>Created:</strong>
+              <span>{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="ticket-card" data-category="bug">
+          <div class="ticket-header">
+            <span class="ticket-id">Ticket #1</span>
+            <span class="badge badge-bug">Bug</span>
+          </div>
+
+          <div class="ticket-body">
+            asnakjsndka
+          </div>
+
+          <div class="ticket-footer">
+            <div class="ticket-meta-item">
+              <strong>Assigned to:</strong>
+              <span class="responsible-person">dssnj@smdk.co.uk</span>
+            </div>
+            <div class="ticket-meta-item">
+              <strong>Created:</strong>
+              <span>2026-10-23 16:48</span>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('search');
+    const categorySelect = document.getElementById('category');
+    const ticketCards = document.querySelectorAll('.ticket-card');
+
+    function filterTickets() {
+      const query = searchInput.value.toLowerCase().trim();
+      const selectedCategory = categorySelect.value.toLowerCase();
+
+      ticketCards.forEach(card => {
+        const textContent = card.innerText.toLowerCase();
+        const cardCategory = card.getAttribute('data-category') || '';
+
+        const matchesSearch = textContent.includes(query);
+        const matchesCategory = selectedCategory === 'all' || cardCategory === selectedCategory;
+
+        if (matchesSearch && matchesCategory) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', filterTickets);
+    categorySelect.addEventListener('change', filterTickets);
+  </script>
+
+</body>
+</html>
